@@ -1,0 +1,38 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.7.7)  3 AUG 2011 09:12
+entering extended mode
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**matrix_log.tex
+(./matrix_log.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+
+./matrix_log.tex:23: LaTeX Error: Environment landscape undefined.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.23 \begin{landscape}
+                      
+? 
+./matrix_log.tex:23: Emergency stop.
+ ...                                              
+                                                  
+l.23 \begin{landscape}
+                      
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+ 
+Here is how much of TeX's memory you used:
+ 8 strings out of 495061
+ 307 string characters out of 1182622
+ 45108 words of memory out of 3000000
+ 3284 multiletter control sequences out of 15000+50000
+ 3640 words of font info for 14 fonts, out of 3000000 for 9000
+ 28 hyphenation exceptions out of 8191
+ 7i,0n,6p,96b,16s stack positions out of 5000i,500n,10000p,200000b,50000s
+./matrix_log.tex:23:  ==> Fatal error occurred, no output PDF file produced!

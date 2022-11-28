@@ -1,0 +1,176 @@
+% Common header definitions and settings for use in the other documentation.
+
+
+% Packages
+\usepackage[T1]{fontenc}    % Font Encoding
+\usepackage{utopia}         % Font
+%\usepackage{courier}        % Monospaced font % This messes up the code listings, as it is wider than the default.
+\usepackage{titling}        % Make modifications to \maketitle
+\usepackage{fancybox}       % Boxes around terminal listings.
+\usepackage{fancyvrb}       % Code listings, terminal sessions, etc.
+\usepackage{color}          % Define and use colours
+\usepackage{tocloft}        % TOC modification
+\usepackage{datetime}       % Date formatting
+\usepackage{float}          % Define new float types (code)
+\usepackage{caption}        % Modify caption appearance
+\usepackage{todonotes}      % Add todo notes in the margin
+\usepackage{framed}         % shaded environment provides background colours
+\usepackage{fourier-orns}   % Ornaments around title
+\usepackage{siunitx}        % Align on decimal point column type
+\usepackage{ifdraft}        % Test for draft mode
+\usepackage{tikz}           % Drawing Trees
+\usepackage{pdflscape}      % provides landscape environment for pdflatex.
+\usepackage{ifthen}         % Provides conditional tests
+\usepackage{hyperref}       % Links, and nameref command
+
+
+
+
+% Define some commannds for displaying the names of different things
+\newcommand{\filename}[1]{\texttt{#1}}
+\newcommand{\command}[1]{\texttt{#1}}
+\newcommand{\var}[1]{$#1$}
+\newcommand{\mathvar}[1]{#1}
+\newcommand{\codefragment}[1]{\texttt{#1}}
+\newcommand{\confsnippet}[1]{\texttt{#1}}
+
+\newcommand{\class}[1]{\texttt{#1}}
+\newcommand{\func}[1]{\texttt{#1}}
+
+
+
+% Set up the appearance of todo notes
+\newcommand{\todonote}[1]{\todo[backgroundcolor=white, linecolor=black, 
+                                size=\small, noline]{#1}}
+
+
+
+% Environment for showing bits of code, terminal listings, and so on.
+\definecolor{box-grey}{gray}{0.4}
+\newcommand{\codelabel}[1]{\textcolor{black}{#1}}
+\DefineVerbatimEnvironment
+    {Code}
+    {Verbatim}
+    {frame=single, fontsize=\scriptsize, framesep=3mm, formatcom=\vspace{7pt}, 
+      xleftmargin=5mm, xrightmargin=5mm, rulecolor=\color{box-grey},
+      labelposition=topline, numbersep=8pt, baselinestretch=1.2,
+      numbers=left, samepage=true}
+% N.B. can use option label=\codelabel{??} as needed.
+
+
+
+% Wrapper for the above for teminal listings
+% This is a pretty nasty hack, but I'm really tired. ;)
+\definecolor{shadecolor}{gray}{0.95}
+\setlength{\FrameSep}{-5mm}
+\newenvironment{Term}
+    {\begin{center}\begin{Sbox}\begin{minipage}{\linewidth-17.4mm}}
+    {\end{minipage}\end{Sbox}{\setlength{\fboxsep}{3mm}\vspace*{8pt}\fcolorbox{box-grey}{shadecolor}{\TheSbox}\vspace*{6pt}}\end{center}}
+
+\DefineVerbatimEnvironment
+    {CodeTerm}
+    {Verbatim}
+    {frame=none, fontsize=\scriptsize, framesep=3mm, formatcom={}, 
+      xleftmargin=0mm, xrightmargin=0mm, rulecolor=\color{box-grey},
+      labelposition=topline, numbersep=8pt, baselinestretch=1.2,
+      numbers=left, samepage=true,
+      numbers=none}
+
+% Usage:
+%\begin{Code}
+%\begin{CodeTerm}
+%Hello, World.
+%\end{CodeTerm}
+%\end{Term}
+
+
+% Rename the abstract
+\renewcommand{\abstractname}{Introduction}
+
+
+
+% Remove section numbering
+\setcounter{secnumdepth}{0}
+
+
+
+% Remove bold and add dots to sections in the TOC
+\renewcommand\cftsecfont{\normalfont}
+\renewcommand\cftsecpagefont{\normalfont}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftsecdotsep}}
+\renewcommand\cftsecdotsep{\cftdot}
+\renewcommand\cftsubsecdotsep{\cftdot}
+% Show only sections in the TOC
+\setcounter{tocdepth}{1}
+
+
+% Configure the \maketitle command a little
+\setlength{\droptitle}{-30pt}
+\predate{\begin{center}\small}
+\postdate{\par\end{center}}
+
+
+
+% Set up the desired date format (20^th July 2011)
+% N.B. this is very similar to the default with the 'nodayofweek' option.
+\newdateformat{mydate}{\ordinaldate{\THEDAY} \monthname[\THEMONTH] \THEYEAR}
+\mydate
+
+
+
+% New float type for code listings
+\floatstyle{plain}
+\floatname{listing}{Listing}
+\newfloat{listing}{p}{lol}
+
+
+
+% Set up appearance of captions
+\captionsetup{margin=30pt,font=small,labelfont=bf}
+
+
+
+% Remove ugly boxes etc around hyperlinks.
+\hypersetup{pdfborder = {0 0 0}}
+
+
+
+
+% Tree Drawing
+% {A, B, {C, D}, {E, F}}
+\newcommand{\treeDrawABCDEF}{%
+    \[\begin{tikzpicture}
+        \node{$\{A, B\}$}
+            child{node {$\{C, D\}$}}
+            child{node {$\{E, F\}$}}
+        ;
+    \end{tikzpicture}\]
+}
+
+
+
+
+% Add a command to produce nice looking tildes: \urltilde
+% http://stackoverflow.com/questions/718479/what-is-the-best-way-to-produce-a-tilde-in-latex-for-a-website/3900556#3900556
+\catcode`~=11 % make LaTeX treat tilde (~) like a normal character
+\newcommand{\urltilde}{\kern -.15em\lower .7ex\hbox{~}\kern .04em}
+\catcode`~=13 % revert back to treating tilde (~) as an active character
+
+
+
+
+% Allow document title to be set from main file.
+\newcommand{\thedocumenttitle}{}
+\newcommand{\documenttitle}[1]{%
+    \renewcommand{\thedocumenttitle}{#1}
+}
+
+
+
+% Title Info
+\title{Flamingo Auto-Tuning\\\decofourleft~~~\thedocumenttitle~~~\decofourright}
+\author{Ben Spencer\\\normalsize\href{mailto:ben@mistymountain.co.uk}{ben@mistymountain.co.uk}}
+\date{Last updated: \today}
+
+
+

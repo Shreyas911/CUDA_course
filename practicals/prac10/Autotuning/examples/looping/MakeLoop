@@ -1,0 +1,6 @@
+
+
+all:
+	gcc $(OPTLEVEL) -o $(EXEC_NAME) loop.c -D XLOOP=$(XLOOP) -D YLOOP=$(YLOOP)
+
+

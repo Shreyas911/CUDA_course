@@ -1,0 +1,60 @@
+AIM: Allow running tests in parallel.
+
+USER PERSPECTIVE:
+
+New configuration file option: parallel
+Either we set this to the number of tests which can be run in parallel, or the 
+"names" of each parallel test. In the former case, each test would be assigned 
+a number from 0..N as it's "name". In the latter case, one test could be run in 
+parallel for each name given. The idea of the names/numbers is that a test will 
+need to know which one of the parallel threads it is, so it can behave 
+appropriately. For example, in CUDA, the programmer would want to use 
+cudaSetDevice() to choose one of the possible GPUs to use.
+
+The parallel "name" would then be available as a substitution into the test 
+command, such as %%PARALLEL%%. This is used to tell the test which thread it 
+should be on. It may be ignored/not used.
+
+Question: How are tests split into the separate threads?
+Idea 1: Compile all tests, add the 'test' commands to one large pool, run these 
+        in parallel until they are all finished, then clean all the tests.
+Idea 2: All tests are put into a pool, each parallel thread compiles a test, 
+        runs it the necessary number of times, then cleans it. All work for 
+        each test is performed together by a single thred.
+I think the second of these is the most sensible.
+
+
+
+DEVELOPER PERSPECTIVE:
+
+There seem to be two main options for parallelising the testing.
+
+Option 1: Use a multi-threaded python program. We spawn the necessary number of 
+    python threads, and each deals with a certain test. When it is done, the 
+    thread could either begin working on a new test, or it could end, and the 
+    system will spawn a new thread as needed.
+
+Option 2: Spawn tests in the background. The subprocess module allows the test 
+    processes to be created, but we need not wait for them to terminate before 
+    continuing. We would create the required number of test processes and then 
+    check when they were finished, spawning a new one when necessary. This 
+    seems a sensible match for 'Idea 1' above, or something like it.
+
+I prefer the idea of option 2, the tuner itself doesn't need to be 
+multi-threaded, it only needs to spawn some independent tests without waiting 
+for the previous ones to finish. We should simply have a maximum number of 
+tests which can be running at once which the tuner will need to honour.
+
+
+Idea:
+
+Compile all tests.
+Add all tests to be run to a pool (incl repetitions).
+Spawn the first N subprocesses.
+Wait for one to finish (using .poll() and checking .returncode)
+When one finishes, log that result and spawn another test from the pool.
+We can keep a vector of timers which correspond to the vector of tests.
+When all tests are finished, run cleanup.
+
+
+

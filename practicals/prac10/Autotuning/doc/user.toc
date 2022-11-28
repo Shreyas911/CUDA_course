@@ -1,0 +1,16 @@
+\contentsline {section}{Background}{2}{section*.1}
+\contentsline {section}{Tutorial}{2}{section*.2}
+\contentsline {section}{The Configuration File}{2}{section*.3}
+\contentsline {subsection}{The \texttt {[variables]} Section}{2}{section*.4}
+\contentsline {subsection}{The \texttt {[values]} Section}{3}{section*.5}
+\contentsline {subsection}{The \texttt {[testing]} Section}{3}{section*.6}
+\contentsline {subsection}{The \texttt {[scoring]} Section}{3}{section*.7}
+\contentsline {subsection}{The \texttt {[output]} Section}{4}{section*.8}
+\contentsline {section}{The Example Programs}{5}{section*.9}
+\contentsline {section}{The Utilities}{6}{section*.10}
+\contentsline {section}{Variable Independence}{7}{section*.11}
+\contentsline {section}{Figures of Merit}{7}{section*.12}
+\contentsline {section}{Data Movement}{8}{section*.13}
+\contentsline {section}{Return Codes}{10}{section*.14}
+\contentsline {section}{Running the Tuner}{10}{section*.15}
+\contentsline {section}{Dependencies}{10}{section*.16}

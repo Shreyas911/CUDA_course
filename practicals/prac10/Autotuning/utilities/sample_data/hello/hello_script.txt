@@ -1,0 +1,347 @@
+
+                               Autotuning System                                
+                                     v0.15                                      
+
+Retrieved settings from config file:
+
+Variables:
+{{FOO}, {BAR}, {OPTLEVEL}}
+
+Displayed as a tree:
+
+             {}             
+             |              
+   +-------+-+-------+      
+   |       |         |      
+ {FOO}   {BAR}   {OPTLEVEL} 
+
+Possible values:
+BAR = ['1', '12']
+FOO = ['1', '2', '34']
+OPTLEVEL = ['-O0', '-O1', '-O2', '-O3', '-Os']
+
+compile: 
+gcc %OPTLEVEL% -o bin/test_%%ID%% hello.c
+
+test: 
+./bin/test_%%ID%% %FOO% %BAR%
+
+clean: 
+rm ./bin/test_%%ID%%
+
+Number of tests to be run: 8
+(with 3 repetitions each)
+
+
+Test 1:
+BAR = 1, FOO = 1, OPTLEVEL = -O0
+Compiling test 1
+
+Running test 1 (1st run)
+Hello World
+
+Result of test 1, 1st run: 0.00306701660156
+Running test 1 (2nd run)
+Hello World
+
+Result of test 1, 2nd run: 0.00307202339172
+Running test 1 (3rd run)
+Hello World
+
+Result of test 1, 3rd run: 0.0029890537262
+Results of test 1:
+Average Result: 0.00304269790649
+Minimum Result: 0.0029890537262
+Maximum Result: 0.00307202339172
+Median Result:  0.00306701660156
+Variance:       1.4430270312e-09
+Std. Deviation: 3.79871956217e-05
+Coeff. of Var.: 0.0124847082389
+Cleaning test 1
+
+
+Test 2:
+BAR = 1, FOO = 2, OPTLEVEL = -O0
+Compiling test 2
+
+Running test 2 (1st run)
+Hello World
+
+Result of test 2, 1st run: 0.00332117080688
+Running test 2 (2nd run)
+Hello World
+
+Result of test 2, 2nd run: 0.00307488441467
+Running test 2 (3rd run)
+Hello World
+
+Result of test 2, 3rd run: 0.00299787521362
+Results of test 2:
+Average Result: 0.00313131014506
+Minimum Result: 0.00299787521362
+Maximum Result: 0.00332117080688
+Median Result:  0.00307488441467
+Variance:       1.90119382953e-08
+Std. Deviation: 0.000137883785469
+Coeff. of Var.: 0.0440338960632
+Cleaning test 2
+
+
+Test 3:
+BAR = 1, FOO = 34, OPTLEVEL = -O0
+Compiling test 3
+
+Running test 3 (1st run)
+Hello World
+
+Result of test 3, 1st run: 0.00307178497314
+Running test 3 (2nd run)
+Hello World
+
+Result of test 3, 2nd run: 0.00315690040588
+Running test 3 (3rd run)
+Hello World
+
+Result of test 3, 3rd run: 0.00297594070435
+Results of test 3:
+Average Result: 0.00306820869446
+Minimum Result: 0.00297594070435
+Maximum Result: 0.00315690040588
+Median Result:  0.00307178497314
+Variance:       5.46413048141e-09
+Std. Deviation: 7.39197570438e-05
+Coeff. of Var.: 0.0240921542193
+Cleaning test 3
+
+
+Test 4:
+BAR = 12, FOO = 1, OPTLEVEL = -O0
+Compiling test 4
+
+Running test 4 (1st run)
+Hello World
+
+Result of test 4, 1st run: 0.00307297706604
+Running test 4 (2nd run)
+Hello World
+
+Result of test 4, 2nd run: 0.00301718711853
+Running test 4 (3rd run)
+Hello World
+
+Result of test 4, 3rd run: 0.00291419029236
+Results of test 4:
+Average Result: 0.00300145149231
+Minimum Result: 0.00291419029236
+Maximum Result: 0.00307297706604
+Median Result:  0.00301718711853
+Variance:       4.32601154898e-09
+Std. Deviation: 6.57724224047e-05
+Coeff. of Var.: 0.0219135383574
+Cleaning test 4
+
+
+Test 5:
+BAR = 12, FOO = 1, OPTLEVEL = -O1
+Compiling test 5
+
+Running test 5 (1st run)
+Hello World
+
+Result of test 5, 1st run: 0.003173828125
+Running test 5 (2nd run)
+Hello World
+
+Result of test 5, 2nd run: 0.00295209884644
+Running test 5 (3rd run)
+Hello World
+
+Result of test 5, 3rd run: 0.00294804573059
+Results of test 5:
+Average Result: 0.00302465756734
+Minimum Result: 0.00294804573059
+Maximum Result: 0.003173828125
+Median Result:  0.00295209884644
+Variance:       1.1128665594e-08
+Std. Deviation: 0.0001054924907
+Coeff. of Var.: 0.034877498808
+Cleaning test 5
+
+
+Test 6:
+BAR = 12, FOO = 1, OPTLEVEL = -O2
+Compiling test 6
+
+Running test 6 (1st run)
+Hello World
+
+Result of test 6, 1st run: 0.00307106971741
+Running test 6 (2nd run)
+Hello World
+
+Result of test 6, 2nd run: 0.00295901298523
+Running test 6 (3rd run)
+Hello World
+
+Result of test 6, 3rd run: 0.00289988517761
+Results of test 6:
+Average Result: 0.00297665596008
+Minimum Result: 0.00289988517761
+Maximum Result: 0.00307106971741
+Median Result:  0.00295901298523
+Variance:       5.03966172497e-09
+Std. Deviation: 7.09905749024e-05
+Coeff. of Var.: 0.0238491031058
+Cleaning test 6
+
+
+Test 7:
+BAR = 12, FOO = 1, OPTLEVEL = -O3
+Compiling test 7
+
+Running test 7 (1st run)
+Hello World
+
+Result of test 7, 1st run: 0.00366401672363
+Running test 7 (2nd run)
+Hello World
+
+Result of test 7, 2nd run: 0.00348997116089
+Running test 7 (3rd run)
+Hello World
+
+Result of test 7, 3rd run: 0.00341606140137
+Results of test 7:
+Average Result: 0.00352334976196
+Minimum Result: 0.00341606140137
+Maximum Result: 0.00366401672363
+Median Result:  0.00348997116089
+Variance:       1.08040391448e-08
+Std. Deviation: 0.000103942479982
+Coeff. of Var.: 0.029501039353
+Cleaning test 7
+
+
+Test 8:
+BAR = 12, FOO = 1, OPTLEVEL = -Os
+Compiling test 8
+
+Running test 8 (1st run)
+Hello World
+
+Result of test 8, 1st run: 0.00363397598267
+Running test 8 (2nd run)
+Hello World
+
+Result of test 8, 2nd run: 0.00358581542969
+Running test 8 (3rd run)
+Hello World
+
+Result of test 8, 3rd run: 0.00346183776855
+Results of test 8:
+Average Result: 0.0035605430603
+Minimum Result: 0.00346183776855
+Maximum Result: 0.00363397598267
+Median Result:  0.00358581542969
+Variance:       5.2579404534e-09
+Std. Deviation: 7.25116573621e-05
+Coeff. of Var.: 0.0203653364484
+Cleaning test 8
+
+
+
+
+
+Additional tests to check parameter importance:
+
+Test 2:
+BAR = 12, FOO = 2, OPTLEVEL = -O2
+Compiling test 2
+
+Running test 2 (1st run)
+Hello World
+
+Result of test 2, 1st run: 0.00371098518372
+Running test 2 (2nd run)
+Hello World
+
+Result of test 2, 2nd run: 0.00347685813904
+Running test 2 (3rd run)
+Hello World
+
+Result of test 2, 3rd run: 0.00343704223633
+Results of test 2:
+Average Result: 0.00354162851969
+Minimum Result: 0.00343704223633
+Maximum Result: 0.00371098518372
+Median Result:  0.00347685813904
+Variance:       1.46050575091e-08
+Std. Deviation: 0.000120851386045
+Coeff. of Var.: 0.0341231118321
+Cleaning test 2
+
+
+Test 3:
+BAR = 12, FOO = 34, OPTLEVEL = -O2
+Compiling test 3
+
+Running test 3 (1st run)
+Hello World
+
+Result of test 3, 1st run: 0.00363802909851
+Running test 3 (2nd run)
+Hello World
+
+Result of test 3, 2nd run: 0.00348114967346
+Running test 3 (3rd run)
+Hello World
+
+Result of test 3, 3rd run: 0.00358915328979
+Results of test 3:
+Average Result: 0.00356944402059
+Minimum Result: 0.00348114967346
+Maximum Result: 0.00363802909851
+Median Result:  0.00358915328979
+Variance:       4.29608664692e-09
+Std. Deviation: 6.55445394134e-05
+Coeff. of Var.: 0.018362674701
+Cleaning test 3
+
+
+Test 4:
+BAR = 1, FOO = 1, OPTLEVEL = -O2
+Compiling test 4
+
+Running test 4 (1st run)
+Hello World
+
+Result of test 4, 1st run: 0.00363206863403
+Running test 4 (2nd run)
+Hello World
+
+Result of test 4, 2nd run: 0.00353813171387
+Running test 4 (3rd run)
+Hello World
+
+Result of test 4, 3rd run: 0.00358510017395
+Results of test 4:
+Average Result: 0.00358510017395
+Minimum Result: 0.00353813171387
+Maximum Result: 0.00363206863403
+Median Result:  0.00358510017395
+Variance:       1.47069082838e-09
+Std. Deviation: 3.83495870692e-05
+Coeff. of Var.: 0.0106969359874
+Cleaning test 4
+
+
+
+Minimal valuation:
+BAR = 12, FOO = 1, OPTLEVEL = -O2
+Minimal Score:
+0.00297665596008
+The system ran 8 tests, taking 0m0.78s.
+(and 3 additional tests, taking 0m0.34s)
+A testing log was saved to 'results/hello_log.csv'
+Additional data was saved to 'results/hello_param_importance.csv'
+A testing transcript was written to 'results/hello_script.txt'

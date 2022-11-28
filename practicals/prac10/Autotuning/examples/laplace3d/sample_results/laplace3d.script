@@ -1,0 +1,579 @@
+Script started on Thu 04 Aug 2011 11:49:40 BST
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ ../../tuner/tun e.py laplace3d.conf[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ct../../tuner/tun[1@e[A]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ [Ci../../tuner/tu[1@n[A]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ [C[Cm../../tuner/t[1@u[A]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ [C[C[Ce../../tuner/[1@t[A]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ [C[C[C[C ../../tuner[1@/[A]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ [C[C[C[C[C
+
+
+                               Autotuning System                                
+                                     v0.14                                      
+
+Retrieved settings from config file:
+
+Variables:
+{BLOCK_X, BLOCK_Y}
+
+Displayed as a tree:
+
+ {BLOCK_X, BLOCK_Y} 
+
+Possible values:
+BLOCK_X = ['32', '64', '128']
+BLOCK_Y = ['2', '4', '6']
+
+compile: 
+make -B ID=%%ID%% BLOCK_X=%BLOCK_X% BLOCK_Y=%BLOCK_Y%
+
+test: 
+./bin/laplace3d_%%ID%%
+
+clean: 
+rm bin/laplace3d_%%ID%%
+
+Number of tests to be run: 9
+(with 3 repetitions each)
+
+
+Test 1:
+BLOCK_X = 32, BLOCK_Y = 2
+Compiling test 1
+nvcc laplace3d.cu -o bin/laplace3d_1 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=32 -D BLOCK_Y=2 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 1 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002513 (s) 
+
+5000x GPU_laplace3d: 2.544369 (s) 
+
+Copy u2 to host: 0.004583 (s) 
+Result of test 1, 1st run: 8.99301505089
+Running test 1 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002218 (s) 
+
+5000x GPU_laplace3d: 2.544290 (s) 
+
+Copy u2 to host: 0.004616 (s) 
+Result of test 1, 2nd run: 8.98541998863
+Running test 1 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002505 (s) 
+
+5000x GPU_laplace3d: 2.544556 (s) 
+
+Copy u2 to host: 0.004588 (s) 
+Result of test 1, 3rd run: 9.78470993042
+Results of test 1:
+Average Result: 9.25438165665
+Minimum Result: 8.98541998863
+Maximum Result: 9.78470993042
+Median Result:  8.99301505089
+Variance:       0.140633653143
+Std. Deviation: 0.375011537347
+Coeff. of Var.: 0.0405225925686
+Cleaning test 1
+
+Test 2:
+BLOCK_X = 64, BLOCK_Y = 2
+Compiling test 2
+nvcc laplace3d.cu -o bin/laplace3d_2 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=64 -D BLOCK_Y=2 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 2 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002959 (s) 
+
+5000x GPU_laplace3d: 2.241255 (s) 
+
+Copy u2 to host: 0.004626 (s) 
+Result of test 2, 1st run: 9.84374117851
+Running test 2 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002969 (s) 
+
+5000x GPU_laplace3d: 2.241164 (s) 
+
+Copy u2 to host: 0.004600 (s) 
+Result of test 2, 2nd run: 9.85856199265
+Running test 2 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002508 (s) 
+
+5000x GPU_laplace3d: 2.240650 (s) 
+
+Copy u2 to host: 0.004603 (s) 
+Result of test 2, 3rd run: 9.81590294838
+Results of test 2:
+Average Result: 9.83940203985
+Minimum Result: 9.81590294838
+Maximum Result: 9.85856199265
+Median Result:  9.84374117851
+Variance:       0.000312713071793
+Std. Deviation: 0.0176836950831
+Coeff. of Var.: 0.00179723269885
+Cleaning test 2
+
+Test 3:
+BLOCK_X = 128, BLOCK_Y = 2
+Compiling test 3
+nvcc laplace3d.cu -o bin/laplace3d_3 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=128 -D BLOCK_Y=2 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 3 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002231 (s) 
+
+5000x GPU_laplace3d: 1.715167 (s) 
+
+Copy u2 to host: 0.004812 (s) 
+Result of test 3, 1st run: 8.09569907188
+Running test 3 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.003599 (s) 
+
+5000x GPU_laplace3d: 1.716478 (s) 
+
+Copy u2 to host: 0.004650 (s) 
+Result of test 3, 2nd run: 9.49392795563
+Running test 3 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002507 (s) 
+
+5000x GPU_laplace3d: 1.717865 (s) 
+
+Copy u2 to host: 0.004604 (s) 
+Result of test 3, 3rd run: 9.75308895111
+Results of test 3:
+Average Result: 9.11423865954
+Minimum Result: 8.09569907188
+Maximum Result: 9.75308895111
+Median Result:  9.49392795563
+Variance:       0.529905516075
+Std. Deviation: 0.72794609421
+Coeff. of Var.: 0.079869106066
+Cleaning test 3
+
+Test 4:
+BLOCK_X = 32, BLOCK_Y = 4
+Compiling test 4
+nvcc laplace3d.cu -o bin/laplace3d_4 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=32 -D BLOCK_Y=4 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 4 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.003589 (s) 
+
+5000x GPU_laplace3d: 2.127195 (s) 
+
+Copy u2 to host: 0.004597 (s) 
+Result of test 4, 1st run: 9.56936693192
+Running test 4 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002220 (s) 
+
+5000x GPU_laplace3d: 2.127472 (s) 
+
+Copy u2 to host: 0.004795 (s) 
+Result of test 4, 2nd run: 6.69743394852
+Running test 4 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002556 (s) 
+
+5000x GPU_laplace3d: 2.127145 (s) 
+
+Copy u2 to host: 0.004638 (s) 
+Result of test 4, 3rd run: 9.63162899017
+Results of test 4:
+Average Result: 8.63280995687
+Minimum Result: 6.69743394852
+Maximum Result: 9.63162899017
+Median Result:  9.56936693192
+Variance:       1.87348624083
+Std. Deviation: 1.36875353546
+Coeff. of Var.: 0.158552492444
+Cleaning test 4
+
+Test 5:
+BLOCK_X = 64, BLOCK_Y = 4
+Compiling test 5
+nvcc laplace3d.cu -o bin/laplace3d_5 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=64 -D BLOCK_Y=4 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 5 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002223 (s) 
+
+5000x GPU_laplace3d: 1.733654 (s) 
+
+Copy u2 to host: 0.004766 (s) 
+Result of test 5, 1st run: 7.28998184204
+Running test 5 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.003565 (s) 
+
+5000x GPU_laplace3d: 1.735093 (s) 
+
+Copy u2 to host: 0.004611 (s) 
+Result of test 5, 2nd run: 9.6081161499
+Running test 5 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002214 (s) 
+
+5000x GPU_laplace3d: 1.735044 (s) 
+
+Copy u2 to host: 0.004913 (s) 
+Result of test 5, 3rd run: 8.45071101189
+Results of test 5:
+Average Result: 8.44960300128
+Minimum Result: 7.28998184204
+Maximum Result: 9.6081161499
+Median Result:  8.45071101189
+Variance:       0.895625058724
+Std. Deviation: 0.946374692563
+Coeff. of Var.: 0.112002267139
+Cleaning test 5
+
+Test 6:
+BLOCK_X = 128, BLOCK_Y = 4
+Compiling test 6
+nvcc laplace3d.cu -o bin/laplace3d_6 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=128 -D BLOCK_Y=4 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 6 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002959 (s) 
+
+5000x GPU_laplace3d: 2.658741 (s) 
+
+Copy u2 to host: 0.004588 (s) 
+Result of test 6, 1st run: 10.6511600018
+Running test 6 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.003589 (s) 
+
+5000x GPU_laplace3d: 2.658880 (s) 
+
+Copy u2 to host: 0.004603 (s) 
+Result of test 6, 2nd run: 10.033272028
+Running test 6 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.006169 (s) 
+
+5000x GPU_laplace3d: 2.658996 (s) 
+
+Copy u2 to host: 0.004931 (s) 
+Result of test 6, 3rd run: 10.3622369766
+Results of test 6:
+Average Result: 10.3488896688
+Minimum Result: 10.033272028
+Maximum Result: 10.6511600018
+Median Result:  10.3622369766
+Variance:       0.0637200000047
+Std. Deviation: 0.252428207625
+Coeff. of Var.: 0.0243918155188
+Cleaning test 6
+
+Test 7:
+BLOCK_X = 32, BLOCK_Y = 6
+Compiling test 7
+nvcc laplace3d.cu -o bin/laplace3d_7 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=32 -D BLOCK_Y=6 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 7 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002221 (s) 
+
+5000x GPU_laplace3d: 1.810496 (s) 
+
+Copy u2 to host: 0.004806 (s) 
+Result of test 7, 1st run: 7.47861003876
+Running test 7 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002210 (s) 
+
+5000x GPU_laplace3d: 1.810434 (s) 
+
+Copy u2 to host: 0.004685 (s) 
+Result of test 7, 2nd run: 8.76150798798
+Running test 7 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002293 (s) 
+
+5000x GPU_laplace3d: 1.810241 (s) 
+
+Copy u2 to host: 0.004635 (s) 
+Result of test 7, 3rd run: 9.70002102852
+Results of test 7:
+Average Result: 8.64671301842
+Minimum Result: 7.47861003876
+Maximum Result: 9.70002102852
+Median Result:  8.76150798798
+Variance:       0.829033406757
+Std. Deviation: 0.910512716417
+Coeff. of Var.: 0.105301600097
+Cleaning test 7
+
+Test 8:
+BLOCK_X = 64, BLOCK_Y = 6
+Compiling test 8
+nvcc laplace3d.cu -o bin/laplace3d_8 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=64 -D BLOCK_Y=6 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 8 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002225 (s) 
+
+5000x GPU_laplace3d: 2.123920 (s) 
+
+Copy u2 to host: 0.004935 (s) 
+Result of test 8, 1st run: 9.61640405655
+Running test 8 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.004780 (s) 
+
+5000x GPU_laplace3d: 2.123736 (s) 
+
+Copy u2 to host: 0.004673 (s) 
+Result of test 8, 2nd run: 7.64705705643
+Running test 8 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002264 (s) 
+
+5000x GPU_laplace3d: 2.125234 (s) 
+
+Copy u2 to host: 0.004776 (s) 
+Result of test 8, 3rd run: 7.680300951
+Results of test 8:
+Average Result: 8.31458735466
+Minimum Result: 7.64705705643
+Maximum Result: 9.61640405655
+Median Result:  7.680300951
+Variance:       0.847547555413
+Std. Deviation: 0.920623460169
+Coeff. of Var.: 0.110723890543
+Cleaning test 8
+
+Test 9:
+BLOCK_X = 128, BLOCK_Y = 6
+Compiling test 9
+nvcc laplace3d.cu -o bin/laplace3d_9 \
+		-I/include -I. -L/lib64 -arch=sm_20 --ptxas-options=-v --use_fast_math -D BLOCK_X=128 -D BLOCK_Y=6 -lcudart
+ptxas info    : Compiling entry function '_Z13GPU_laplace3diiiiPfS_' for 'sm_20'
+ptxas info    : Used 21 registers, 64 bytes cmem[0]
+Running test 9 (1st run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002212 (s) 
+
+5000x GPU_laplace3d: 2.145016 (s) 
+
+Copy u2 to host: 0.005626 (s) 
+Result of test 9, 1st run: 6.96617293358
+Running test 9 (2nd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002205 (s) 
+
+5000x GPU_laplace3d: 2.144422 (s) 
+
+Copy u2 to host: 0.004692 (s) 
+Result of test 9, 2nd run: 8.99450707436
+Running test 9 (3rd run)
+
+Grid dimensions: 128 x 128 x 128
+
+ Using CUDA device 0: Tesla C2070
+
+
+Copy u1 to device: 0.002503 (s) 
+
+5000x GPU_laplace3d: 2.144091 (s) 
+
+Copy u2 to host: 0.004735 (s) 
+Result of test 9, 3rd run: 10.127120018
+Results of test 9:
+Average Result: 8.69593334198
+Minimum Result: 6.96617293358
+Maximum Result: 10.127120018
+Median Result:  8.99450707436
+Variance:       1.70983754859
+Std. Deviation: 1.30760756674
+Coeff. of Var.: 0.150370008062
+Cleaning test 9
+
+
+Minimal valuation:
+BLOCK_X = 32, BLOCK_Y = 4
+Minimal Score:
+6.69743394852
+The system ran 9 tests.
+A testing log was saved to 'results/laplace3d.csv'
+
+real	4m11.732s
+user	0m26.970s
+sys	3m35.970s
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ e[K
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ 
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3dbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d$ cd results/
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3d/resultsbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d/results$ ls
+laplace3d.csv  laplace3d.script
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3d/resultsbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d/results$ ../../. ./utilities/output_gnuplot.py laplace3d.csv p[Klaplace3d.plt
+Reading 'laplace3d.csv'
+Generating gnuplot script
+Writing 'laplace3d.plt'
+Done
+There are some instructions for generating a png at the top of the file.
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3d/resultsbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d/results$ head la place3d.plt
+# laplace3d.plt
+# Automatically generated gnuplot file to display the results of testing.
+# 
+# For PNG output, use something like the following:
+# $ gnuplot
+# gnuplot> set terminal png large size 800, 1200
+# gnuplot> set output 'laplace3d.png'
+# gnuplot> load 'laplace3d.plt'
+# gnuplot> exit
+# 
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3d/resultsbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d/results$ gnuplot [A
+The program 'gnuplot' can be found in the following packages:
+ * gnuplot-nox
+ * gnuplot-x11
+Ask your administrator to install one of them
+]0;benspencer@zen: ~/Autotuning/summer/test/0.14/examples/laplace3d/resultsbenspencer@zen:~/Autotuning/summer/test/0.14/examples/laplace3d/results$ exit
+exit
+
+Script done on Thu 04 Aug 2011 11:57:50 BST

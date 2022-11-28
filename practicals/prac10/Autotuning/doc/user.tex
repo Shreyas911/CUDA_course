@@ -1,0 +1,658 @@
+\documentclass[a4paper, draft]{article}
+
+\input{header.tex}
+\documenttitle{User's Guide}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This guide describes the features and use of my automatic parameter tuning 
+system. The system can be used to find optimal parameter values in a 
+parameterised program. It has been designed to be very general-purpose and 
+makes few assumptions about how it should be used.
+
+If you have any comments or questions about the tuner or this guide then
+please feel free to get in touch.
+\end{abstract}
+
+
+\tableofcontents
+
+\newpage
+
+
+\section{Background}
+\label{sec:intro}
+The auto-tuner is used to find the optimal settings of program parameters. 
+These would often be constants within the program which are used to control 
+some aspect of its operation. If it is unclear exactly which combination of 
+settings to use in a particular situation, the tuner can find them. 
+
+If some 
+parameters are independent of each other, this independence can be exploited 
+to speed up the tuning process. Usually, we want to optimise the running time 
+of a program, so this is the default. However, it is possible to provide a 
+custom `figure of merit' which is used to rank the different tests.
+
+
+
+
+
+
+
+\section{Tutorial}
+\label{sec:tutorial}
+This guide will go through the features of the tuner in detail, and can be 
+used as a reference. A tutorial is available, which should probably be read 
+first. It will lead you through the process of preparing and tuning an 
+example program, explaining each step. This tutorial is 
+\filename{doc/tutorial.pdf}, distributed with the tuner.
+
+
+
+
+
+
+
+\section{The Configuration File}
+\label{sec:conf-file}
+The tuner uses a configuration file to determine what to optimise, and how 
+tests can be run. This file is used to set up and run the optimisation.
+
+The file must contain five sections, each beginning with a 
+\confsnippet{[section\_name]} header. Within each section, options are set 
+using the syntax \confsnippet{opt = value}. Lines that begin with 
+\confsnippet{\#} or \confsnippet{;} are treated as comments and ignored.
+
+A template configuration file (\filename{examples/template.conf}) is provided, 
+containing some explanation of each option. The example programs also each come 
+with a sample configuration file for tuning them.
+
+\textbf{All paths and commands used must be relative to the configuration 
+file.}
+
+\subsection{The \confsnippet{[variables]} Section}
+This section defines the program parameters which are to be optimised, and 
+any independence between them. There is only a single option:
+
+\begin{description}
+    \item[\confsnippet{variables}] (Required) \\
+        This option gives a list of the program parameters which should be 
+        optimised. There are two possible formats:
+        \begin{itemize}
+            \item A simple comma separated list of variable names, 
+                for example: \\
+                \confsnippet{variables~=~FOO,~BAR,~BAZ}
+
+            \item A list describing the independence between variables, 
+                as described in the \emph{\nameref{sec:var-indep}} section. 
+                For example: \\
+                \confsnippet{variables~=~\{\{FOO\},~\{BAR,~BAZ\}\}} \\
+        \end{itemize}
+\end{description}
+
+
+
+\subsection{The \confsnippet{[values]} Section}
+This section gives the possible values that each variable above can take. They 
+are specified as a comma separated list for each variable.
+
+Each variable from the \confsnippet{[variables]} section must have an entry 
+here. Any entries here which are not mentioned in the variable list will 
+be ignored.
+
+All values are interpreted as text strings, which are used without conversion, 
+for example as compiler flags or the program's arguments.
+
+
+
+
+\subsection{The \confsnippet{[testing]} Section}
+This section defines how to compile, if needed, and run the tests. Tests can 
+also be removed once their testing is complete, if needed.
+
+All the options in this section specify commands which will be executed by the 
+tuner. The value of any variable from the \confsnippet{[variables]} section 
+can be substituted into the command which is run, using the syntax 
+\confsnippet{\%VAR\_NAME\%}.
+
+For example, if there is a variable \var{FOO} being optimised, then the 
+\confsnippet{test} command might be: \confsnippet{./myTestProgram~-op~\%FOO\%}. 
+If for a particular test the variable \var{FOO} takes the value \var{3}, then 
+to get a score for that test, the command \confsnippet{./myTestProgram~-op~3} 
+is executed and timed.
+
+There is also one special substitution: \texttt{\%\%ID\%\%}. 
+This provides a unique id for each test (which is a counter increasing from 1).
+
+
+\begin{description}
+
+    \item[\texttt{compiler}] (Optional) \\
+        If specified, this command is executed before testing begins. 
+        It can be used to compile a test if a parameter is benig changed at 
+        compile time (for example a compiler flag or a \codefragment{\#define} 
+        statement being overridden by the compiler).
+
+    \item[\texttt{test}] (Required) \\
+        To perform a test, this command will be executed and timed by the 
+        tuning system. The running time of the command is taken as the score 
+        for each test. If a custom figure-of-merit is being used (chosen with 
+        the \confsnippet{optimal} option below), then the running time is not 
+        measured and instead the score is read from the final line of output 
+        from this command.
+
+    \item[\texttt{cleanup}] (Optional) \\
+        If specified, this command is executed once the test is complete. 
+        It can be used to remove any executables which were compiled.
+
+\end{description}
+
+
+
+
+\subsection{The \confsnippet{[scoring]} Section}
+This section specifies how tests are scored against each other to choose 
+which is the best.
+
+\begin{description}
+
+    \item[\confsnippet{repeat}] (Optional, defaults to \confsnippet{1, min}) \\
+        Gives the number of times each test should be repeated. When 
+        this option is set, the compilation and cleanup (if present) are 
+        still only run once, only the actual test is repeated. The variance, 
+        standard deviation and coefficient of variation will be displayed at 
+        the end of each test.
+        
+        When a test is repeated, the repeated test scores must be combined 
+        into one overall score for the test. This can be one of the following: 
+        \confsnippet{min}, \confsnippet{max}, \confsnippet{med} or 
+        \confsnippet{avg}. 
+        
+        The number of repetitions and the aggregation function are specified 
+        as a comma separated pair. If only the number is given, 
+        \confsnippet{min} is used as the default aggregate.
+
+    \item[\confsnippet{optimal}] (Optional, defaults to \texttt{min\_time}) \\
+        Specifies whether to take the minimum or maximum score as being the 
+        best. The settings \confsnippet{min\_time} and \confsnippet{max\_time} 
+        use the running time of the \confsnippet{test} command as the score 
+        for a test. The settings \confsnippet{min} and \confsnippet{max} will 
+        use a custom figure-of-merit, which is read from the final line of 
+        output. This is described in the \emph{\nameref{sec:custom-fom}} 
+        section.
+
+\end{description}
+
+
+\subsection{The \confsnippet{[output]} Section}
+Finally, a log can be saved, detailing the testing process:
+
+\begin{description}
+
+    \item[\confsnippet{log}] (Optional) \\
+        Specifies the name of a \filename{.csv} file which will be generated. 
+        The file will contain details of all the tests performed, which 
+        parameter values were used for each and what the individual and 
+        overall scores were. This can be used for more detailed analysis 
+        after tuning. 
+        
+        \textbf{Warning:} If this file already exists, it will be overwritten.
+    
+    \item[\confsnippet{script}] (Optional) \\
+        Specifies the name of a file which will be used to log a `script' of 
+        the tuner's work. This includes which tests are being run and any 
+        output from the compilation and testing.
+        
+        When this option is used, only a summary is shown on screen.
+        
+        \textbf{Warning:} If this file already exists, it will be overwritten.
+    
+\end{description}
+
+
+
+
+
+
+
+
+\clearpage
+
+
+\section{The Example Programs}
+There are some example programs to tune in the \filename{examples} directory.
+These show how a few different parameterised programs can be tuned, the 
+changes required to the programs and makefiles, and the configuration files 
+required.
+
+\begin{description}
+    
+    \item[\filename{examples/hello/}] \hfill \\
+        A trivial test case, which demonstrates how different parts of the 
+        system are connected. It compiles a `hello world' program, 
+        written in C.
+        
+        Two parameters, named \var{FOO} and \var{BAR}, are completely 
+        ignored and one, \var{OPTLEVEL}, controls the compiler 
+        optimisation level flag.
+        
+        The running time of the program is used as a figure of merit, aiming 
+        to find the minimum (fastest). There are also example settings in the 
+        configuration file to optimise the file size of the generated 
+        executable.
+        
+    \item[\filename{examples/laplace3d/}] \hfill \\
+        Uses compile-time parameters to tune the block size used by a CUDA GPU 
+        program.
+    
+    \item[\filename{examples/looping/}] \hfill \\
+        This is another fairly trivial C program, which runs a loop as 
+        determined by the parameters \var{XLOOP} and \var{YLOOP}.
+        
+        There are settings in the configuration file to measure the running 
+        time as measured by the tuner, or by using a custom script, 
+        \filename{loop\_test.sh}, which uses the \command{time} utility.
+        
+    \item[\filename{examples/maths/}] \hfill \\
+        A very simple test case to demonstrate the use of a custom figure of 
+        merit. The parameters \var{X}, \var{Y} and \var{Z} are simply summed 
+        using the \command{expr} utility, with no compilation being performed.
+        
+    \item[\filename{examples/matlab/}] \hfill \\
+        Demonstrates the use of run-time parameters to find determine the 
+        optimum level of `strip-mining' vectorisation in a MATLAB program.
+    
+    \item[\filename{examples/matrix/}] \hfill \\
+        Blocked matrix multiplication test case. This is the example used in 
+        the tutorial to demonstrate the changes required to the program. The 
+        original (not tunable) version is given in \filename{original/}, 
+        the modified version after completing the tutorial is given in 
+        \filename{modified/} and finally, there is a version which 
+        checks the blocked version against the naive version in 
+        \filename{comparison/}.
+        
+    
+\end{description}
+
+
+
+
+\clearpage
+
+
+\section{The Utilities}
+The tuner comes with several utilities which can be used to analyse or 
+visualise the results of the tuning process. They use \filename{.csv} log 
+files generated by the tuner. The utilities are all found in the 
+\filename{utilities} directory.
+
+
+
+\begin{description}
+
+    \item[\filename{utilities/output\_gnuplot.py}] \hfill \\
+        This script converts a CSV log file into a gnuplot PLT file. This PLT 
+        file can be used with the gnuplot plotting program to produce a 
+        detailed graph of the testing process. If required, the PLT file can 
+        be modified by hand. The following options can be specified:
+        \begin{description}
+            \item[\command{-h} \textnormal{or} \command{-{}-help}] \hfill\\
+                Outputs some usage information and exits.
+            
+            \item[\command{-r SCORE} \textnormal{or} \command{-{}-reference=SCORE}] \hfill\\
+                Plots a reference score for comparison with the tuner's results.
+            
+        \end{description}
+        
+        
+        If \filename{mylog.csv} is the tuning log and \filename{myplot.plt} is 
+        the plot file to generate (it will be overwritten if it exists):
+        \begin{Code}[numbers=none]
+./output_gnuplot.py [-h] [-r SCORE] mylog.csv myplot.plt
+        \end{Code}
+
+
+    \item[\filename{utilities/output\_screen.py}] \hfill \\
+        This script reads a CSV log file and produces a graph displayed on the 
+        screen. This can then be saved if needed. The 'matplotlib' python 
+        library is required, which may not be installed by default. 
+        The following options can be specified:
+        \begin{description}
+            \item[\command{-h} \textnormal{or} \command{-{}-help}] \hfill\\
+                Outputs some usage information and exits.
+            
+            \item[\command{-r SCORE} \textnormal{or} \command{-{}-reference=SCORE}] \hfill\\
+                Plots a reference score for comparison with the tuner's results.
+            
+            \item[\command{-s} \textnormal{or} \command{-{}-stddev}] \hfill\\
+                Plots the standard deviation of multiple test repetitions.
+            
+        \end{description}
+        
+        If \filename{mylog.csv} is the tuning log:
+        \begin{Code}[numbers=none]
+./output_screen.py [-h] [-r SCORE] [-s] mylog.csv
+        \end{Code}
+
+
+    \item[\filename{utilities/csv\_plot.m}] \hfill \\
+        This is a MATLAB program which can be used to display a graph of the 
+        testing process.
+        
+        To use, modify the file as needed and use MATLAB to generate a graph.
+
+
+\end{description}
+
+
+
+
+
+\clearpage
+
+\section{Variable Independence}
+\label{sec:var-indep}
+We say two variables are independent when they can be optimised separately. 
+This is, \var{FOO} and \var{BAR} are independent if when we optimise 
+\var{FOO} with \var{BAR} held at some fixed value, then that optimal 
+value of \var{FOO} will be optimal for \emph{any} setting of \var{BAR} 
+(and vice-versa). 
+
+Independent variables are written as separate `sets' of 
+variables. The example we just saw would be written as:
+\[\{\{FOO\},~\{BAR\}\}\]
+
+More complex independences can also be written. As an example, suppose 
+\var{A} and \var{B} control the operation of the entire program (maybe 
+they are compiler flags), \var{C} and \var{D} control one aspect of the 
+program and \var{E} and \var{F} another aspect. The aspect controlled 
+by \var{C} and \var{D} is not related to the aspect controlled by 
+\var{E} and \var{F}. This independence would be written like this: 
+\[\{A,~B,~\{C,~D\},~\{E,~F\}\}\]
+This shows the two sub-lists \var{\{C,~D\}} and \var{\{E,~F\}} are 
+independent of each other and that the variables \var{A} and \var{B} 
+`dominate' those sub-lists. However, the sub-list \var{\{C,~D\}} shows that 
+\var{C} and \var{D} are dependent on each other and must be tuned together. 
+Similarly, \var{A} and \var{B} are dependent on each other.
+
+This notation essentially describes a `tree' of 
+variables, where higher nodes dominate their subtrees and sibling nodes are 
+independent:
+\treeDrawABCDEF
+
+Variable lists can be nested in this way as much as needed to describe 
+the independences in the parameters being optimised.
+
+
+
+
+
+\section{Figures of Merit}
+\label{sec:custom-fom}
+By default (when using \confsnippet{optimal = *\_time}), each test is run and 
+its execution time is measured. This timing is used to rank the tests and 
+choose the best. Sometimes, it is more useful to be able to choose a custom 
+figure of merit. This can be because the part of the program being optimised 
+is not the longest running part of the program, or because you wish to measure 
+some other property, such as memory or network usage.
+
+When the \confsnippet{optimal} option is set to \confsnippet{min} or 
+\confsnippet{max}, the auto-tuner reads the output from the program and 
+interprets the last line of output as the figure of merit. 
+You are free to make any measurements necessary within the test itself 
+(given by the \confsnippet{test} option). The score (a floating point or 
+integer number with no units or other text) for the test must be output as 
+the final line of the command's output.
+
+
+
+
+
+
+
+
+
+
+\clearpage
+
+\section{Data Movement}
+Because arbitrary commands can be used for compilation, execution and cleaning, 
+it is possible to use the parameters in any way you could from a command 
+prompt. However, it is not always obvious how the parameter values can be 
+`passed' through the toolchain to where they are needed. The following list of 
+tips may help. Although they are fairly linux/\command{make}/\command{gcc} 
+specific, the ideas should still be applicable to any build tools.
+
+%It can be useful to check that the compilation and testing commands are 
+%correctly passing the parameters through the build chain and returning any 
+%figure-of-meit back to the tuner. This can be checked by only giving 
+%one possible value for each parameter in the configuration file, so a tuning 
+%run will require exactly one test.
+
+To perform a `dry-run' with only one test to check these settings, 
+simply set a single possible value for each parameter.
+
+\begin{description}
+
+\item[Tuner $\Longrightarrow$ Shell Command] \hfill\\
+    To pass the value of a parameter to a shell command, simply use the \% 
+    substitution. If you are tuning a parameter named \var{FOO} (in the 
+    variable list) then \confsnippet{\%FOO\%} will substitute the current 
+    value of \var{FOO} being tested into the command to execute.
+    
+    There is also a special substitution, \confsnippet{\%\%ID\%\%}, which is 
+    replaced by a 
+    
+    This can be used to set compiler flags, program arguments, and so on. For 
+    example, \filename{hello.conf} contains the following lines:
+    % Do some funky (read: hacked) line numbering on this example...
+    {
+    \let\theFancyVerbLineOld\theFancyVerbLine
+    \renewcommand{\theFancyVerbLine}{%
+        \ifthenelse{\value{FancyVerbLine} = 1}{%
+            \setcounter{FancyVerbLine}{49} %
+            \theFancyVerbLineOld %
+        }{}%
+        \ifthenelse{\value{FancyVerbLine} = 51}{%
+            \setcounter{FancyVerbLine}{56} %
+            \theFancyVerbLineOld %
+        }{}%
+        \ifthenelse{\value{FancyVerbLine} = 58}{%
+            \setcounter{FancyVerbLine}{66} %
+            \theFancyVerbLineOld %
+        }{}%
+    }
+    \begin{Code}[label=\codelabel{examples/hello/hello.conf},
+                    commandchars=\\\{\}]
+compile = gcc %OPTLEVEL% -o bin/test_%%ID%% hello.c
+\ldots{}
+test = ./bin/test_%%ID%% %FOO% %BAR%
+\ldots{}
+clean = rm ./bin/test_%%ID%%
+    \end{Code}
+    }
+    
+    This will cause the following commands to be executed by the tuner:
+    \begin{Code}[numbers=none, commandchars=\\\{\}]
+gcc -O0 -o bin/test_1 hello.c
+./bin/test_1 1 1                                                  (Timed)
+./bin/test_1 1 1                                                  (Timed)
+./bin/test_1 1 1                                                  (Timed)
+rm ./bin/test_1
+gcc -O0 -o bin/test_2 hello.c
+./bin/test_2 2 1                                                  (Timed)
+./bin/test_2 2 1                                                  (Timed)
+./bin/test_2 2 1                                                  (Timed)
+rm ./bin/test_2
+\ldots{}
+    \end{Code}
+    
+    The commands you enter are executed directly, as if typed into a command 
+    prompt. You are not limited to only running a compiler, or just your test 
+    program. It can be useful to use a makefile for compilation or a shell 
+    script for measuring and returning a custom figure of merit.
+
+
+
+\item[Tuner $\Longrightarrow$ Makefile] \hfill\\
+    Parameters can be passed to the \command{make} command simply by appending 
+    \command{NAME=VALE} to the call to \command{make}, which will allow 
+    them to be used within a \filename{Makefile}. However, changing the 
+    parameters does not trigger a recompilation of the affected files 
+    (because there has been no change to the source code), so this must be 
+    forced with the \command{-B} option to \command{make}.
+    
+    For example, \filename{looping.conf} contains the following:\footnote{Note 
+    that \var{EXEC\_NAME} is a new variable for the \filename{Makefile} only, 
+    it is not being tuned.}
+    \begin{Code}[firstnumber=50, stepnumber=2, firstline=2,
+                    label=\codelabel{examples/looping/looping.conf}]
+    
+compile = make -f MakeLoop -B EXEC_NAME=./bin/loop_%%ID%% XLOOP=%XLOOP% \
+                            YLOOP=%YLOOP% OPTLEVEL=%OPTLEVEL%
+    \end{Code}
+    
+    These variables can now be used within the \filename{Makefile} as if they 
+    were environment variables, with the syntax \command{\$(NAME)}.
+
+
+
+
+
+\item[Makefile $\Longrightarrow$ Compiler] \hfill\\
+    Once the parameters have been passed into the \filename{Makefile} as described 
+    above, they can be used in the commands to be executed. For example, the 
+    \filename{Makefile} for the `looping' example contains the following, 
+    which passes the parameters to the compiler:
+    \begin{Code}[firstnumber=4, label=\codelabel{examples/looping/MakeLoop}]
+gcc $(OPTLEVEL) -o $(EXEC_NAME) loop.c -D XLOOP=$(XLOOP) -D YLOOP=$(YLOOP)
+    \end{Code}
+
+
+
+
+
+
+\item[Compiler $\Longrightarrow$ Program Code] \hfill\\
+    As shown above, the `looping' \filename{Makefile} uses the \command{-D} 
+    option to \command{gcc} to set the parameter values for \var{XLOOP} and 
+    \var{YLOOP}. This flag sets them as if they had been set with a 
+    \codefragment{\#define} statement in the program itself, so they can be 
+    used as constants within the program source code.
+    
+
+
+
+\item[Tuner $\Longrightarrow$ Environment Variable] \hfill\\
+    Some programs may be controlled by a certain environment variable, which 
+    you want to tune. For example, programs using OpenMP for parallelism 
+    can have the number of parallel threads controlled with the environment 
+    variable \command{OMP\_NUM\_THREADS}. To tune this variable, the 
+    \command{env} command can be used to run the program to be tested in 
+    an environment where \command{OMP\_NUM\_THREADS} has the value we want:
+    \begin{Code}[numbers=none]
+test = env OMP_NUM_THREADS=%OMP_NUM_THREADS% ./program
+    \end{Code}
+    
+    
+    
+\item[Command Sequencing] \hfill\\
+    The commands given in the \confsnippet{compile}, \confsnippet{test} and 
+    \confsnippet{clean} options are passed directly to the shell, so features 
+    of the shell, such as using \command{;} to run one command after another, 
+    can be used. For example, another possible solution to the above problem 
+    of setting an environment variable would be to export it, then run the 
+    command which depends on it:
+    \begin{Code}[numbers=none]
+test = export OMP_NUM_THREADS=%OMP_NUM_THREADS%; ./program
+    \end{Code}
+    
+    
+
+
+\end{description}
+
+
+
+
+
+
+
+
+\clearpage
+
+
+\section{Return Codes}
+The tuner will check the return code of all the commands which are executed 
+(\confsnippet{compile}, \confsnippet{test} and \confsnippet{clean}) to see 
+if they failed. Any non-zero return code is considered a failure. This check 
+is used to discount tests which either do not compile or do not run with one 
+particular setting of the parameters. 
+
+This is part of the tuning process, 
+as it discounts tests which will not run in your environment which may still 
+run elsewhere. For example, if the number of parallel threads is being tuned, 
+valid possible values on one machine may fail to compile on machines where 
+there are more threads than processors. 
+
+If this causes problems, for example 
+if your program routinely returns non-zero error codes, then the 
+\confsnippet{test} command could be run from a `wrapper' shell script which 
+always succeeds, or the shell's sequencing operator (\command{;}) could be 
+used to set the return code afterwards, the following will always return 
+with code 0 (success), whatever the behaviour of \command{./program}:
+\begin{Code}[numbers=none]
+test = ./program; true
+\end{Code}
+
+If you do this, the system will not be able to detect failed tests, so they 
+will still be timed (and will often fail quickly, leading to very low running 
+times), so be careful of erroneous results.
+
+
+
+
+
+
+\section{Running the Tuner}
+The main script which runs the tuner is \filename{tuner/tune.py}. In the 
+top-level directory, \command{autotune} is a link to this and should be used 
+to run the tuner.
+
+While the tuner is running tests it can be interrupted with the 
+\command{Ctrl+C} command. If the \confsnippet{log} option was used in the 
+configuration file, then a partial log of the tests completed so far will 
+be saved.
+
+
+
+\section{Dependencies}
+The tuner is written in \textbf{Python}, so you will need to have the Python 
+interpreter installed. At least \textbf{version 2.5} is required, and 
+Python 3000 is not supported.
+
+So far, the tuner has mostly been tested under linux, but is
+designed to work on any platform (the most compelling reason for choosing 
+Python was this portability and flexibility). On linux, the 
+tuner will be directly executable with \command{./autotune} or 
+\command{./tuner/tune.py}, but on windows it will need to be given as an 
+argument to the python interpreter: 
+\command{python~tuner\textbackslash{}tune.py}.
+
+The utility \command{output\_screen.py} (which plots graphs of the testing 
+process on screen) requires the \filename{matplotlib} 
+Python module, which may not be installed with a standard python 
+distribution. If it is not installed, you will not be able to use this 
+utility, but the rest of the system will still work as normal.
+
+
+\end{document}
+
+
+
+
+

@@ -1,0 +1,386 @@
+\documentclass[a4paper, draft]{article}
+
+\input{header.tex}
+\documenttitle{Developer's Guide}
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This guide provides an introduction to how the auto-tuner was designed and 
+developed. It should be helpful to anyone who wants to understand how the 
+tuner works, whether to use it more effectively, or modify it to better suit 
+your needs.
+
+If you have any comments or questions about the tuner or this guide then
+please feel free to get in touch.
+\end{abstract}
+
+\tableofcontents
+
+
+
+\section{Goals}
+The tuner is implemented in Python, and requires at least version 2.5.
+
+Flexibility has been the overriding goal from the start. The programmer can 
+specify arbitrary shell commands which are used to compile, run and score 
+tests. This guide will give an overview of the high-level design of the tuner: 
+how it is split into modules and what each is designed to do, as well as how 
+they interact and together create the overall system. 
+
+I have tried to keep separate parts of the system independent of each other, 
+which has mostly succeeded, but some different parts do rely heavily on the 
+behaviour of others, even when they have been abstracted into separate modules.
+
+
+
+
+\clearpage
+
+\section{Original Project Report}
+I originally began work on the tuner as a third year project towards my 
+undergraduate degree. My project 
+report\footnote{\url{http://people.maths.ox.ac.uk/~gilesm/op2/autotuning-2011-05-30.pdf}} 
+(which is very long) contains some very detailed information on the design and 
+development of the system, especially the optimisation algorithm, which I 
+explain in detail and prove correct. 
+
+It is worth remembering that the report was based 
+on an older version of the tuner (0.11), so some parts are very different 
+(notably tests are now run by the \class{Evaluator} class, rather than 
+`evaluation functions') but the broad architecture of the system and many of 
+the details (for example the optimisation algorithm) remain the same.
+
+
+
+
+
+\section{High-Level Description}
+This section details the main classes providing the tuner's core 
+functionality:
+
+\begin{description}
+    
+    \item[\class{VarTree}] \hfill\\
+        This class represents the variable trees which list the variables to 
+        be tuned and which are independent of each other. This structure is 
+        described (from a user's perspective) in more detail in the 
+        User's Guide (\filename{doc/user.pdf}). 
+        
+        The variables are supplied to the system in a nested braces format:
+        \[\{A,~B,~\{C,~D\},~\{E,~F\}\}\]
+        This says that the variables \var{A} and \var{B} are dependent on each 
+        other, and on \var{C}, \var{D}, \var{E} and \var{F}, but that the sets 
+        \var{\{C,~D\}} and \var{\{E,~F\}} are independent. Being independent 
+        means that these sets can be tuned separately: if an optimal valuation 
+        of \var{\{C,~D\}} is found at one setting of \var{\{E,~F\}}, then this 
+        will still be optimal for any other valuation of \var{\{E,~F\}}.
+        
+        This notation represents a tree of variables, where each node contains 
+        a set of dependent variables and a set of subtrees which are all 
+        mutually independent, but which depend on the `parent' variables. The 
+        above example would be represented:
+        \treeDrawABCDEF
+        
+        The \class{VarTree} class represents these trees. Each instance 
+        represents a tree node and they are linked together to represent the 
+        entire tree. The objects themselves do not require much extra 
+        information or functionality, they only contain a list of top-level 
+        variables and a list of subtrees. The only methods provided are to 
+        flatten the tree into a list of variables. All other operations on 
+        \class{VarTree} objects are provided as outside functions which 
+        manipulate them (the most interesting being \codefragment{treeprint()}, 
+        which returns a string to display the tree structure in a terminal).
+        
+        
+        
+    \item[\class{Optimisation}] \hfill\\
+        This class defines the optimisation algorithm used by the tuner. 
+        This algorithm exploits variable independence (given by a 
+        \class{VarTree}) to reduce the number of tests required, while still 
+        being comprehensive. It is parameterise by a \class{VarTree} Instance, 
+        listing the variables to tune and their independence; a list of the 
+        possible values of each variable; and an \class{Evaluator} instance, 
+        which handles the actual running of the tests.
+        
+        The algorithm used is recursive, following the structure of the 
+        \class{VarTree}. At leaf nodes, every possible combination of the 
+        variables is tested by brute force. At branch nodes, the system 
+        recognises that each subtree is independent, so optimises them 
+        separately. For each possible valuation of the top-level variables, 
+        it recursively optimises the subtrees, one-by-one. The score when each 
+        subtree is optimised gves the best possible score for this setting of 
+        top-level variables. Once all the top-level valuations have been tried, 
+        the one which gave the best score is chosen and returned, along with 
+        it's subtree-optimums.
+        
+        
+        
+    \item[\class{Evaluator}] \hfill\\
+        This class is used by \class{Optimisation} to actually test different 
+        settings of variables, and to keep a log of the tests, so the results 
+        can be looked up as they are needed. The \class{Evaluator} is 
+        parameterised by the commands required to compile and test a 
+        particular test, and how to calculate the overall score if repeat 
+        tests are being run. This class performs all the direct interaction 
+        with the shall and the tests which are run (e.g. reading their output 
+        and checking their return code).
+        
+        When the optimisation algorithm reaches a leaf node of the 
+        \class{VarTree}, it submits a whole group of tests to the 
+        \class{Evaluator} at once. At the moment, these tests are simply run 
+        in sequence, compiling one, testing it a number of times and then 
+        cleaning it; before moving on to the next. However, because thests are 
+        submitted in groups, there is scope for other implementations of 
+        \class{Evaluator} to provide different evaluation strategies, such as 
+        running tests interleaved with other tests, to reduce the effects of 
+        inconsistent load on the system.
+        
+        The log of tests performed is kept for two reasons. Firstly, it is 
+        used by the optimiser to check the scores of tests which were 
+        submitted. Secondly, it is used at the end of testing to create the 
+        \filename{.csv} log file listing all tests performed.
+        
+    
+\end{description}
+
+
+
+\clearpage
+
+\section{A Tuning Run}
+This section describes a run of the progam from start to finish, showing how 
+the different parts of the system are connected and work together to provide 
+the final result.
+
+The main program is \filename{tune.py}. When the user runs this, they provide 
+a configuration file as an argument. The first step is that 
+\filename{tune\_conf.py} is used to read this configuration file (using the 
+Python module \codefragment{ConfigParser}) and validate the settings.
+
+Next, an instance of \class{Evaluator} is created, parameterised by the 
+compilation and testing commands, and the number of test repetitions.
+
+An instance of \class{Optimisation} is created, and provided with the 
+\class{VarList} and list of possible values read from the configuration file, 
+and the \class{Evaluator} which it can use to run tests. 
+
+The system prints out a description of the information read from the 
+configuration file and the tuning it is about to perform, 
+then begins the tuning.
+
+The optimiser works recursively over the structure of the \class{VarTree} and 
+at each leaf node it submits a group of tests to the \class{Evaluator}. The 
+\class{Evaluator} runs each test in sequence, logging the results. If each 
+test is to be repeated, it runs them and calculates the overall score.
+
+If the tests are to be timed by the system, the \class{Evaluator} does this 
+timing to determine a test's score. If the tests use a custom figure-of-merit, 
+then the \class{Evaluator} captures their output and checks the final line 
+for the score, which is interpreted as a float.
+
+The scores for each test are checked by the optimiser to find the best setting 
+of the variables at that leaf node, which it selects and continues optimising 
+the rest of the tree. As higher level variables are changed, it will be 
+necessary to return to the leaves and fin new optimal settings for the changes 
+in higher-level variables.
+
+Once the optimisation is complete, the optimiser returns the best valuation 
+found, as well as the score for that valuation, and the number of tests 
+performed.
+
+The log of testing is passed from the \class{Evaluator} to 
+\filename{logging.py} and written out as a \filename{.csv} file, which 
+contains all the details of the testing.
+
+The \filename{.csv} log file can then be processed (by the user, not 
+automatically) with any of the log analysis utilities. These can be used to 
+generate graphs of the testing process, to show (for example) which variables 
+had the greatest effect.
+
+
+
+
+
+
+\clearpage
+
+\section{File Listing}
+
+
+\begin{description}
+
+
+    \item[\filename{autotune}] \hfill\\
+        The tuner (A link to \filename{tuner/tune.py}).
+        
+    \item[\filename{doc/}] \hfill\\
+        Documentation for the tuner.
+        
+        \begin{description}
+            \item[\filename{dev.pdf}] \hfill\\
+                Developer's documentation (this document).
+                
+            \item[\filename{tutorial.pdf}] \hfill\\
+                A Beginner's Tutorial. Leads them through the setup and tuning 
+                of the matrix-multiplication test case.
+                
+            \item[\filename{user.pdf}] \hfill\\
+                User's guide. A more comprehensive reference detailing all the 
+                features and abilities of the tuner.
+                
+                
+        \end{description}
+        
+        
+    \item[\filename{examples/}] \hfill\\
+        Example programs to demonstrate the system's use. Each comes with a 
+        sample configuration file which can be used to tune it, and most 
+        have some sample results from this tuning.
+        
+        \begin{description}
+            \item[\filename{hello}] \hfill\\
+                A simple test case which compiles a `hello world' program 
+                with different levels of compiler optimisation.
+                
+            \item[\filename{laplace3d}] \hfill\\
+                A CUDA test case. Compiles and tests a version of the 
+                \filename{laplace3d} CUDA example from Mike Giles' CUDA 
+                programming course\footnote{\url{http://people.maths.ox.ac.uk/gilesm/cuda/}}.
+                
+            \item[\filename{looping}] \hfill\\
+                A simple test case where parameters control the number of loop 
+                iterations performed in the program.
+                
+            \item[\filename{maths}] \hfill\\
+                A simple test case where parameters are summed using the 
+                \command{expr} command. Demonstrates the use of a custom 
+                figure-of-merit.
+                
+            \item[\filename{matlab}] \hfill\\
+                A MATLAB program being tuned to determine the optimum 
+                level of `strip-mining' vectorisation.
+                
+            \item[\filename{matrix}] \hfill\\
+                A blocked matrix-matrix multiplication test case, which 
+                is tuned to find the optimal block size.
+                
+        \end{description}
+        
+        
+    \item[\filename{README\_Dev}] \hfill\\
+        Breif intro for developers, contains a file listing and change log.
+        
+    \item[\filename{README\_User}] \hfill\\
+        Breif intro for users, mostly points to the proper documentation.
+        
+    \item[\filename{tuner/}] \hfill\\
+        The Python source code for the tuner itself.
+        
+        \begin{description}
+            \item[\filename{evaluator.py}] \hfill\\
+                Defines the \class{Evaluator} class, which controls how tests 
+                are evaluated, handling all compilation, execution and timing 
+                of tests. It also keeps a log of all tests performed, 
+                for use by the optimiser.
+
+            \item[\filename{helpers.py}] \hfill\\
+                Provides several small helper functions, 
+                which are used elsewhere.
+
+            \item[\filename{logging.py}] \hfill\\
+                Provides a function to output the testing log as a 
+                \filename{.csv} file.
+
+            \item[\filename{optimisation\_bf.py}] \hfill\\
+                A brute force optimiser, \class{OptimisationBF}, implementing 
+                the same methods as \class{Optimisation}. THis is used for 
+                testing, and in the system's self-demonstration.
+
+            \item[\filename{optimisation.py}] \hfill\\
+                The optimisation algorithm. Defines the \class{Optimisation} 
+                class. This class sets up and runs the recursive optimisation 
+                algorithm, which exploits variable independence to reduce 
+                the number of tests that must be performed.
+
+            \item[\filename{output.py}] \hfill\\
+                Controls where the tuner's output is sent. This can be printed 
+                to the screen or saved to a file. Sets up the three output 
+                possiblities \codefragment{all}, \codefragment{short} and 
+                \codefragment{full} for the tuner to use.
+
+            \item[\filename{test\_evaluations.py}] \hfill\\
+                Provides a `dummy' \class{Evaluator} class, 
+                \class{FuncEvaluator}. This implements the same interface 
+                as \class{Evaluator}, but uses an `artifical' evaluation 
+                function to score each test, rather than running any shell 
+                commands. This is used for the system's self-demonstration, 
+                as well as for testing. The evaluation function respects the 
+                variable independence of the problem being solved.
+
+            \item[\filename{testing.py}] \hfill\\
+                Checks \class{Optimisation} against \class{OptimisationBF} for 
+                a couple of different inputs. This is used as a demonstration 
+                of the system.
+
+            \item[\filename{tune\_conf.py}] \hfill\\
+                Reads settings from the config file and performs 
+                some validation.
+
+            \item[\filename{tune.py}] \hfill\\
+                The main script. Reads the config file from the command line, 
+                sets up and runs the optimisation and reports the final 
+                reusults to the user.
+
+            \item[\filename{vartree\_parser.py}] \hfill\\
+                Defines a \class{VarTree} parser, which was generated by  
+                \command{wisent}, a Python 
+                parser-generator\footnote{\url{http://seehuhn.de/pages/wisent}}. 
+                This is used by \filename{vartree.py} to 
+                convert token strings into parse trees. The language grammar 
+                was constructed so that these parse trees have the same 
+                structure as the corresponding \class{VarTree}, making the 
+                conversion simple.
+
+            \item[\filename{vartree.py}] \hfill\\
+                Defines the \class{VarTree} class and several related 
+                functions. These include a parser for creating \class{VarTree} 
+                objects from strings and a function to print a \class{VarTree} 
+                in a tree representation.
+
+        \end{description}
+        
+        
+    \item[\filename{utilities/}] \hfill\\
+        Contains utilities to analyse nd visualise the tuning results.
+        
+        \begin{description}
+                \item[\filename{common.py}] \hfill\\
+                    Some helper functions for reading in the CSV file.
+                    
+                \item[\filename{csv\_plot.m}] \hfill\\
+                    A matlab script to draw plots.
+                    
+                \item[\filename{output\_gnuplot.py}] \hfill\\
+                    Outputs a \command{gnuplot} script for plotting graphs.
+                    
+                \item[\filename{output\_screen.py}] \hfill\\
+                    Displays a graph on screen with \filename{matplotlib} 
+                    (a Python graph plotting library).
+                    
+        \end{description}
+        
+        
+\end{description}
+
+
+
+
+
+
+
+\end{document}

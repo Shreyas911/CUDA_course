@@ -1,0 +1,71 @@
+Autotuning System
+ISSUES.txt - Basic issue tracking and TODO list.
+
+
+
+MORE ERROR CHECKING EVERYWHERE
+
+
+Why is the self-demonstration so slow? This is since the move to Evaluators 
+from evaluation functions. (see below)
+
+
+Clean up implementation of test_evaluations.py. generateEvalFunc() should be 
+incorporated into FuncEvaluator (which might be renamed).
+
+
+Make gnuplot output cleverer when choosing the positions of xtics. Currently 
+they are placed every 5 tests, no matter how many there are.
+
+
+Check which settings in the conf file are affected by line breaks and in what 
+way. Document or fix.
+
+
+Add compiler flag testing to the matrix multiply example. This would make it a 
+better demonstration of the system.
+
+
+Allow the tree printer to use the proper box-drawing characters.
+UPDATE: Added this as an option, but need to test if they can be displayed 
+before it can be used. Currently the setting is hardcoded in vartree.py
+
+
+Be clear whether the list of vars comes from the VarTree or from possValues in 
+various places. The VarTree is the definitive source.
+
+
+Offer the option of running only a single test, to check that everything is 
+working correctly.
+UPDATE: We decided a better idea would be to simply quit (which is now more 
+    graceful) or only specify one possibility in the conf file, in which case 
+    the documentation should include this tip.
+
+
+Propose that 'optimal' can choose between 'min_time' and 'min_custom' or 
+something similar (min_score, min_measurement, ...?). 'min' is the obvious 
+choice at the moment, but doesn't do what you'll most likely want.
+
+
+The system seems to sometimes (not always) run some extra tests for the 
+additional parameter importance information which are not needed. Seen when 
+tuning the 'hello' example, which shouldn't require any extra tests, but 
+sometimes seems to run some (tested on the laptop).
+
+
+Update documentation to use the following method of running the tuner:
+~/Autotuning/autotune
+NOT:
+../../autotune
+../../tuner/tune.py
+This should be the same for the utilities as well:
+~/Autotuning/utlities/output_gnuplot.py
+
+
+Some Ideas for the tutorial:
+Nicer, more friendly stylesheet.
+What is the "what you'l need" section typically called?
+Better implementation of the grey terminal listing boxes.
+Include an example of using a custom FOM with the matrix multiply example.
+
+
