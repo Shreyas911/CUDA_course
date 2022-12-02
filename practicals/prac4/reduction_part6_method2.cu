@@ -29,16 +29,24 @@ __global__ void reduction(int *g_idata, int *d_global_sum)
 
     extern  __shared__  int temp[];
 
-    int global_tid = threadIdx.x + blockDim.x*blockIdx.x;
     int tid = threadIdx.x;
-    int warp_id = threadIdx.x / 32;
-    temp[tid] = g_idata[global_tid];
-    int warp_sum;
+    int global_tid = tid + blockDim.x*blockIdx.x;
+    int warp_id = tid / 32;
+    int local_var = g_idata[global_tid];  
+    int block_sum;
 
-    warp_sum = __reduce_add_sync(-1, temp[tid]);
-    if((tid+1)%32==0) {
-      atomicAdd(d_global_sum,warp_sum);
+    local_var = __reduce_add_sync(-1, local_var);
+    if(tid%32==0) temp[warp_id] = local_var;
+    __syncthreads();
+    if(tid/32==0) {
+      for (int d = 1; d < 32; d *= 2) {
+        temp[tid] += __shfl_xor_sync(-1, temp[tid], d);
+      }  
     }
+
+    __syncthreads();
+    // finally, first thread puts result into global memory
+    if(tid==0) atomicAdd(d_global_sum, temp[0]);
 }
 
 
@@ -70,7 +78,7 @@ int main( int argc, const char** argv)
   h_global_sum = (int*) malloc(sizeof(int));
       
   for(int i = 0; i < num_elements; i++) 
-    h_data[i] = 1;
+    h_data[i] = i;
 
   // compute reference solutions
 
